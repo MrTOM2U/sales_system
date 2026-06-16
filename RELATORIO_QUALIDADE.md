@@ -80,15 +80,56 @@ O desenvolvimento da função `calcular_frete` seguiu estritamente o ciclo **Red
 
 ### 3.1 Fase RED — Testes escritos antes da implementação
 
-Os casos de teste foram redigidos a partir dos critérios de aceitação da história de usuário, sem nenhuma linha de código de produção existente. Neste estado, todos falhavam com `AttributeError: module 'gerenciador_pedidos' has no attribute 'calcular_frete'`.
+Os casos de teste foram redigidos a partir dos critérios de aceitação da história de usuário antes de qualquer código de produção. Para reproduzir e evidenciar esta fase, o corpo da função `calcular_frete` foi substituído por `pass` — simulando o estado inicial onde a função existe mas não possui implementação. Neste estado todos os testes de comportamento falharam, pois `pass` retorna `None` implicitamente.
 
-**Testes da fase Red (`TestTDD_Red_FreteGratis`):**
+**Log real da Fase RED** (`pytest tests/test_tdd_frete.py::TestTDD_Red_FreteGratis -v`):
 
 ```
-FAIL  test_red_frete_zero_quando_total_acima_500      # 501.00 → esperado 0.0
-FAIL  test_red_frete_cobrado_quando_total_igual_500   # 500.00 → esperado 20.0
-FAIL  test_red_frete_cobrado_quando_total_abaixo_500  # 200.00 → esperado 20.0
-FAIL  test_red_frete_cobrado_quando_total_zero        # 0.0    → esperado 20.0
+============================= test session starts ==============================
+platform darwin -- Python 3.12.9, pytest-8.3.3, pluggy-1.6.0
+rootdir: /Users/jpbertoldo/Downloads/sales_system
+collected 5 items
+
+tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_zero_quando_total_acima_500  FAILED [ 20%]
+tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_zero_quando_total_igual_a_501 FAILED [ 40%]
+tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_cobrado_quando_total_igual_500 FAILED [ 60%]
+tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_cobrado_quando_total_abaixo_500 FAILED [ 80%]
+tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_cobrado_quando_total_zero    FAILED [100%]
+
+================================= FAILURES ====================================
+_ TestTDD_Red_FreteGratis.test_red_frete_zero_quando_total_acima_500 _
+
+    def test_red_frete_zero_quando_total_acima_500(self):
+>       assert gp.calcular_frete(501.00) == 0.0
+E       assert None == 0.0
+E        +  where None = <function calcular_frete at 0x108f5f740>(501.0)
+
+_ TestTDD_Red_FreteGratis.test_red_frete_cobrado_quando_total_igual_500 _
+
+    def test_red_frete_cobrado_quando_total_igual_500(self):
+>       assert gp.calcular_frete(500.00) == 20.0
+E       assert None == 20.0
+E        +  where None = <function calcular_frete at 0x108f5f740>(500.0)
+
+_ TestTDD_Red_FreteGratis.test_red_frete_cobrado_quando_total_abaixo_500 _
+
+    def test_red_frete_cobrado_quando_total_abaixo_500(self):
+>       assert gp.calcular_frete(200.00) == 20.0
+E       assert None == 20.0
+
+_ TestTDD_Red_FreteGratis.test_red_frete_cobrado_quando_total_zero _
+
+    def test_red_frete_cobrado_quando_total_zero(self):
+>       assert gp.calcular_frete(0.0) == 20.0
+E       assert None == 20.0
+
+FAILED tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_zero_quando_total_acima_500
+FAILED tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_zero_quando_total_igual_a_501
+FAILED tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_cobrado_quando_total_igual_500
+FAILED tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_cobrado_quando_total_abaixo_500
+FAILED tests/test_tdd_frete.py::TestTDD_Red_FreteGratis::test_red_frete_cobrado_quando_total_zero
+
+========================== 5 failed in 0.05s ==================================
 ```
 
 **Critérios de aceitação que guiaram a escrita:**
@@ -206,6 +247,31 @@ tests/test_unitarios.py::TestCalcularFreteUnitario::test_frete_negativo_lanca_va
 
 ============================== 48 passed in 0.09s ==============================
 ```
+
+### 3.5 Artefato Visual de Gestão — Kanban (Trello)
+
+Como evidência do uso ativo da metodologia ágil, o time utilizou um quadro Kanban no **Trello** (board: *Sales System — Gerenciador Pedidos*) com as seguintes colunas e WIP limits:
+
+| Coluna | WIP Limit | Finalidade |
+| ------ | --------- | ---------- |
+| Backlog | — | Histórias priorizadas pelo PO (US-01 a US-04 + 2 bugs) |
+| Selecionado (Sprint) | — | Itens comprometidos para a sprint corrente |
+| Em Desenvolvimento | 2 | Implementação ativa — limita trabalho paralelo |
+| Em Revisão | 3 | Code review (Tech Lead) + validação QA |
+| Concluído | — | Histórias aceitas pelo PO com DoD cumprida |
+
+**Cards criados no Sprint 1:**
+
+| Card | Etiquetas | Checklists |
+| ---- | --------- | ---------- |
+| [US-01] Processar Venda Simples | Dev A · QA Lead | 5 CA + 6 itens DoD = 11 itens |
+| [US-02] Aplicar Cupom de Desconto | Dev A · Dev B | 5 CA + 6 itens DoD = 11 itens |
+| [US-03] Calcular Frete Automático | QA Lead · Dev B | 6 CA + 6 itens DoD = 12 itens |
+| [US-04] Atomicidade das Vendas | Tech Lead · Dev B | 2 CA + 4 itens DoD = 6 itens |
+| [BUG] RED-01 — teste duplicado test_unitarios.py | QA Lead · BUG | 3 itens DoD |
+| [BUG] RED-02 — teste duplicado test_tdd_frete.py | QA Lead · BUG | 3 itens DoD |
+
+A estrutura completa de papéis, histórias de usuário, critérios de aceitação e Definition of Done está documentada no artefato complementar `GESTAO_EQUIPE.md`.
 
 ---
 
